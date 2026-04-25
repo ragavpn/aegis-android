@@ -35,9 +35,9 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     prefsViewModel: PreferencesViewModel = hiltViewModel()
 ) {
-    val signedOut by viewModel.signedOut.collectAsStateWithLifecycle()
-    val prefs by prefsViewModel.prefs.collectAsStateWithLifecycle()
-    val loading by prefsViewModel.loading.collectAsStateWithLifecycle()
+    val signedOut by viewModel.signedOut.collectAsState()
+    val prefs by prefsViewModel.prefs.collectAsState()
+    val loading by prefsViewModel.loading.collectAsState()
 
     LaunchedEffect(Unit) {
         prefsViewModel.load()
@@ -189,7 +189,6 @@ fun SettingsScreen(
                         }
                     }
                 }
-            }
 
             Spacer(Modifier.weight(1f))
 

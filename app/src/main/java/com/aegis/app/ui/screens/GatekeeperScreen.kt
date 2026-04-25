@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,8 +20,8 @@ fun GatekeeperScreen(
     onNavigateToOnboarding: () -> Unit,
     viewModel: PreferencesViewModel = hiltViewModel()
 ) {
-    val loading by viewModel.loading.collectAsStateWithLifecycle()
-    val prefs by viewModel.prefs.collectAsStateWithLifecycle()
+    val loading by viewModel.loading.collectAsState()
+    val prefs by viewModel.prefs.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.load()

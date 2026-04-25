@@ -13,6 +13,7 @@ import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,9 +58,9 @@ fun ArticleDetailScreen(
         interactionViewModel.load(articleId)
     }
 
-    val state by viewModel.detailState.collectAsStateWithLifecycle()
-    val interaction by interactionViewModel.interaction.collectAsStateWithLifecycle()
-    val podcastState by podcastViewModel.state.collectAsStateWithLifecycle()
+    val state by viewModel.detailState.collectAsState()
+    val interaction by interactionViewModel.interaction.collectAsState()
+    val podcastState by podcastViewModel.state.collectAsState()
 
     val context = LocalContext.current
     val exoPlayer = remember { ExoPlayer.Builder(context).build() }
@@ -323,3 +324,4 @@ fun ArticleDetailScreen(
         }
     }
 }
+

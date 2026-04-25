@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,7 +52,7 @@ fun NotificationsScreen(
     onArticleClick: (String) -> Unit = {},
     viewModel: NotificationViewModel = hiltViewModel()
 ) {
-    val state by viewModel.listState.collectAsStateWithLifecycle()
+    val state by viewModel.listState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -214,3 +215,4 @@ private fun NotificationCard(notification: Notification, onClick: () -> Unit) {
         }
     }
 }
+

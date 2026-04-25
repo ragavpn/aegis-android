@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,8 +53,8 @@ private val InputSrf   = Color(0xFF1E293B)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(viewModel: ChatViewModel = hiltViewModel(), isBriefingMode: Boolean = false) {
-    val messages by viewModel.messages.collectAsStateWithLifecycle()
-    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val messages by viewModel.messages.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
 
@@ -61,8 +62,8 @@ fun ChatScreen(viewModel: ChatViewModel = hiltViewModel(), isBriefingMode: Boole
     val voiceInputHandler = remember { VoiceInputHandler(context) }
     val voiceOutputHandler = remember { VoiceOutputHandler(context) }
     var isVoiceMode by remember { mutableStateOf(false) }
-    val isListening by voiceInputHandler.isListening.collectAsStateWithLifecycle()
-    val partialText by voiceInputHandler.partialText.collectAsStateWithLifecycle()
+    val isListening by voiceInputHandler.isListening.collectAsState()
+    val partialText by voiceInputHandler.partialText.collectAsState()
 
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
         if (isGranted) {
@@ -385,3 +386,4 @@ private fun ChatInputBar(
         }
     }
 }
+

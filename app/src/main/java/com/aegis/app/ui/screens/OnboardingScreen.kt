@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,8 +50,8 @@ fun OnboardingScreen(
     onComplete: () -> Unit,
     viewModel: PreferencesViewModel = hiltViewModel()
 ) {
-    val prefs by viewModel.prefs.collectAsStateWithLifecycle()
-    val saved by viewModel.saved.collectAsStateWithLifecycle()
+    val prefs by viewModel.prefs.collectAsState()
+    val saved by viewModel.saved.collectAsState()
 
     LaunchedEffect(saved) {
         if (saved) {
@@ -197,3 +198,4 @@ private fun ModuleCard(
         }
     }
 }
+

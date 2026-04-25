@@ -5,7 +5,6 @@ import com.aegis.app.data.model.UserPreferences
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.query.Conflict
 import javax.inject.Inject
 import javax.inject.Singleton
 
