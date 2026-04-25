@@ -17,6 +17,11 @@ class ArticleRepository @Inject constructor(
         return apiService.getArticles()
     }
 
+    /** Calls POST /articles/generate to kick off the backend article pipeline. */
+    suspend fun triggerGenerate() {
+        apiService.triggerGenerateArticles()
+    }
+
     suspend fun getArticleById(id: String): Article {
         return supabase
             .from("articles")

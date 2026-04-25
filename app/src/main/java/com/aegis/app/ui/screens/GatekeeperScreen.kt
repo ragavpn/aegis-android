@@ -12,32 +12,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.aegis.app.ui.viewmodel.PreferencesViewModel
+import com.aegis.app.ui.viewmodel.GatekeeperDestination
+import com.aegis.app.ui.viewmodel.GatekeeperViewModel
 
+/**
+ * Routing screen that shows a spinner while resolving where to send the user.
+ *
+ * Delegates all routing logic to [GatekeeperViewModel], which:
+ *  1. Reads the local Room flag first (instant, offline-safe).
+ *  2. Falls back to Supabase preferences check if the flag is false.
+ */
 @Composable
 fun GatekeeperScreen(
     onNavigateToMain: () -> Unit,
     onNavigateToOnboarding: () -> Unit,
-    viewModel: PreferencesViewModel = hiltViewModel()
+    viewModel: GatekeeperViewModel = hiltViewModel()
 ) {
-    val loading by viewModel.loading.collectAsState()
-    val prefs by viewModel.prefs.collectAsState()
+    val destination by viewModel.destination.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.load()
-    }
-
-    LaunchedEffect(loading) {
-        if (!loading) {
-            // A brand new user starts with the default ALL_MODULES, but we can tell if they are new
-            // if their preferences ID is null (meaning no row in DB).
-            // Actually, the easiest way is checking if the DB row exists.
-            // If it returned null, we set a default in ViewModel but ID remains null.
-            if (prefs.id == null) {
-                onNavigateToOnboarding()
-            } else {
-                onNavigateToMain()
-            }
+    LaunchedEffect(destination) {
+        when (destination) {
+            GatekeeperDestination.Main       -> onNavigateToMain()
+            GatekeeperDestination.Onboarding -> onNavigateToOnboarding()
+            GatekeeperDestination.Pending    -> { /* still resolving — stay on spinner */ }
         }
     }
 

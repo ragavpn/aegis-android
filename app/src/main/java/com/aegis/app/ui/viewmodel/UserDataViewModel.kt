@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.aegis.app.data.model.ALL_MODULES
 import com.aegis.app.data.model.ArticleInteraction
 import com.aegis.app.data.model.UserPreferences
+import com.aegis.app.data.repository.AppSettingsRepository
 import com.aegis.app.data.repository.UserDataRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,12 +50,25 @@ class ArticleInteractionViewModel @Inject constructor(
         _interaction.value = updated
         viewModelScope.launch { repo.upsertInteraction(updated) }
     }
+
+    /**
+     * Records the percentage (0–100) of the article body scrolled when the user navigates away.
+     * Only updates the stored value if the new depth exceeds the previous maximum.
+     */
+    fun recordScrollDepth(articleId: String, scrollDepthPercent: Int) {
+        val current = _interaction.value ?: ArticleInteraction(articleId = articleId)
+        val newDepth = maxOf(current.scrollDepthPercent, scrollDepthPercent)
+        val updated = current.copy(scrollDepthPercent = newDepth)
+        _interaction.value = updated
+        viewModelScope.launch { repo.upsertInteraction(updated) }
+    }
 }
 
 // ── User Preferences ──────────────────────────────────────────────────────────
 @HiltViewModel
 class PreferencesViewModel @Inject constructor(
-    private val repo: UserDataRepository
+    private val repo: UserDataRepository,
+    private val appSettingsRepo: AppSettingsRepository
 ) : ViewModel() {
 
     private val _prefs = MutableStateFlow(UserPreferences(modules = ALL_MODULES))
@@ -107,6 +121,8 @@ class PreferencesViewModel @Inject constructor(
     fun save() {
         viewModelScope.launch {
             repo.upsertPreferences(_prefs.value)
+            // Write the Room flag so GatekeeperScreen can route instantly on next cold start (offline-safe)
+            appSettingsRepo.setOnboardingComplete(true)
             _saved.value = true
         }
     }

@@ -66,22 +66,32 @@ fun ArticleDetailScreen(
     val exoPlayer = remember { ExoPlayer.Builder(context).build() }
     var isPlaying by remember { mutableStateOf(false) }
 
-    // Read-time tracking
+    // ── Shared scroll state: used for verticalScroll AND scroll-depth calculation ──
+    val scrollState = rememberScrollState()
+
+    // Read-time tracking: capture start time once
     val readStartMs = remember { System.currentTimeMillis() }
 
+    // On leaving the screen: record read duration AND scroll depth (PLAN.md §7.3)
     DisposableEffect(articleId) {
         onDispose {
             val durationSeconds = ((System.currentTimeMillis() - readStartMs) / 1000).toInt()
-            if (durationSeconds > 2) { // only record meaningful reads
+            if (durationSeconds > 2) {
                 interactionViewModel.recordReadDuration(articleId, durationSeconds)
+            }
+
+            // Compute scroll depth as a percentage of how far down the content the user scrolled
+            val maxScroll = scrollState.maxValue.takeIf { it > 0 } ?: 1
+            val depthPercent = ((scrollState.value.toFloat() / maxScroll) * 100).toInt()
+                .coerceIn(0, 100)
+            if (depthPercent > 0) {
+                interactionViewModel.recordScrollDepth(articleId, depthPercent)
             }
         }
     }
 
     DisposableEffect(Unit) {
-        onDispose {
-            exoPlayer.release()
-        }
+        onDispose { exoPlayer.release() }
     }
 
     LaunchedEffect(podcastState) {
@@ -167,7 +177,7 @@ fun ArticleDetailScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
+                            .verticalScroll(scrollState)   // uses shared scrollState for depth tracking
                             .padding(horizontal = 20.dp, vertical = 16.dp)
                     ) {
                         // Tier badge
@@ -252,7 +262,7 @@ fun ArticleDetailScreen(
 
                         Spacer(Modifier.height(20.dp))
 
-                        // Body
+                        // Full body
                         Text(
                             "FULL INTELLIGENCE REPORT",
                             color = TxtSecond,
@@ -268,7 +278,7 @@ fun ArticleDetailScreen(
                             lineHeight = 24.sp
                         )
 
-                        // Modules
+                        // Module chips
                         if (article.modules.isNotEmpty()) {
                             Spacer(Modifier.height(24.dp))
                             Text(
@@ -324,4 +334,3 @@ fun ArticleDetailScreen(
         }
     }
 }
-

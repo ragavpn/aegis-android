@@ -51,6 +51,24 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Pull-to-refresh handler: triggers the backend article generation pipeline first
+     * (POST /articles/generate), then reloads the article list (GET /articles).
+     * Silently ignores generate errors — the reload still runs so the user sees existing content.
+     */
+    fun triggerGenerateAndRefresh() {
+        viewModelScope.launch {
+            _listState.value = ArticleListState.Loading
+            runCatching { repository.triggerGenerate() } // fire-and-forget; don't block on it
+            try {
+                val articles = repository.getArticles()
+                _listState.value = ArticleListState.Success(articles)
+            } catch (e: Exception) {
+                _listState.value = ArticleListState.Error(e.message ?: "Failed to load articles")
+            }
+        }
+    }
+
     fun loadArticle(id: String) {
         viewModelScope.launch {
             _detailState.value = ArticleDetailState.Loading

@@ -27,4 +27,7 @@ interface AegisApiService {
 
     @retrofit2.http.GET("articles")
     suspend fun getArticles(): List<com.aegis.app.data.model.Article>
+
+    @POST("articles/generate")
+    suspend fun triggerGenerateArticles(): Map<String, Any>
 }

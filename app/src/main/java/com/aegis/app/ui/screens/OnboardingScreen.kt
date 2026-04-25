@@ -16,7 +16,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -28,12 +27,11 @@ import com.aegis.app.ui.viewmodel.PreferencesViewModel
 
 private val BgDark     = Color(0xFF0A0E1A)
 private val AccBlue    = Color(0xFF3B82F6)
-private val AccGold    = Color(0xFFF59E0B)
 private val TxtPrimary = Color(0xFFF1F5F9)
 private val TxtSecond  = Color(0xFF94A3B8)
 private val CardSrf    = Color(0xFF1A2235)
 
-// Emoji map for modules
+// Emoji icon map for modules
 private val MODULE_ICONS = mapOf(
     "GEOPOLITICS" to "🌍",
     "ENERGY"      to "⚡",
@@ -43,6 +41,18 @@ private val MODULE_ICONS = mapOf(
     "TECHNOLOGY"  to "🔬",
     "CLIMATE"     to "🌡️",
     "TRADE"       to "🚢"
+)
+
+// 1-line description for each module (PLAN.md §7.1)
+private val MODULE_DESCRIPTIONS = mapOf(
+    "GEOPOLITICS" to "Global power & conflict",
+    "ENERGY"      to "Oil, gas & renewables",
+    "FINANCE"     to "Markets & capital flows",
+    "DEFENCE"     to "Military & security",
+    "ECONOMICS"   to "Macro trends & policy",
+    "TECHNOLOGY"  to "Tech, AI & cyber",
+    "CLIMATE"     to "Environment & weather",
+    "TRADE"       to "Supply chains & tariffs"
 )
 
 @Composable
@@ -74,10 +84,7 @@ fun OnboardingScreen(
             Spacer(Modifier.height(64.dp))
 
             // Header
-            Text(
-                "⚡",
-                fontSize = 48.sp
-            )
+            Text("⚡", fontSize = 48.sp)
             Spacer(Modifier.height(20.dp))
             Text(
                 "AEGIS",
@@ -114,6 +121,7 @@ fun OnboardingScreen(
                     ModuleCard(
                         module = module,
                         icon = MODULE_ICONS[module] ?: "📌",
+                        description = MODULE_DESCRIPTIONS[module] ?: "",
                         selected = selected,
                         onClick = { viewModel.toggleModule(module) }
                     )
@@ -122,7 +130,7 @@ fun OnboardingScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // Counter
+            // Selection counter
             Text(
                 "${prefs.modules.size} of ${ALL_MODULES.size} selected",
                 color = TxtSecond,
@@ -161,6 +169,7 @@ fun OnboardingScreen(
 private fun ModuleCard(
     module: String,
     icon: String,
+    description: String,
     selected: Boolean,
     onClick: () -> Unit
 ) {
@@ -178,14 +187,17 @@ private fun ModuleCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1.4f)
+            .aspectRatio(1.3f)
             .clip(RoundedCornerShape(16.dp))
             .background(bgColor)
             .border(1.dp, borderColor, RoundedCornerShape(16.dp))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        ) {
             Text(icon, fontSize = 28.sp)
             Spacer(Modifier.height(6.dp))
             Text(
@@ -195,7 +207,17 @@ private fun ModuleCard(
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                 letterSpacing = 1.sp
             )
+            if (description.isNotEmpty()) {
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    description,
+                    color = TxtSecond.copy(alpha = 0.65f),
+                    fontSize = 10.sp,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 13.sp,
+                    maxLines = 1
+                )
+            }
         }
     }
 }
-
