@@ -45,7 +45,7 @@ android {
             // Secrets are injected automatically by the secrets plugin
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -106,4 +106,12 @@ dependencies {
     // Firebase BOM + Cloud Messaging
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-messaging-ktx")
+
+    // Room (local DB — onboarding flag, caching)
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
+
+    // Security — EncryptedSharedPreferences
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 }

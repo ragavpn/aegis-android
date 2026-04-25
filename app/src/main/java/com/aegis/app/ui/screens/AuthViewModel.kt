@@ -2,6 +2,7 @@ package com.aegis.app.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aegis.app.data.local.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val supabase: SupabaseClient
+    private val supabase: SupabaseClient,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AuthState>(AuthState.Idle)
@@ -28,6 +30,7 @@ class AuthViewModel @Inject constructor(
                     this.email = email
                     this.password = password
                 }
+                persistSession()
                 _uiState.value = AuthState.Success
             } catch (e: Exception) {
                 _uiState.value = AuthState.Error(e.message ?: "An unknown error occurred")
@@ -43,20 +46,35 @@ class AuthViewModel @Inject constructor(
                     this.email = email
                     this.password = password
                 }
+                persistSession()
                 _uiState.value = AuthState.Success
             } catch (e: Exception) {
                 _uiState.value = AuthState.Error(e.message ?: "An unknown error occurred")
             }
         }
     }
-    
+
     fun resetState() {
         _uiState.value = AuthState.Idle
+    }
+
+    /**
+     * Persists the Supabase session tokens into EncryptedSharedPreferences
+     * so they survive process death without re-authentication.
+     * Complies with AI_RULES.md §2 — no plaintext token storage.
+     */
+    private fun persistSession() {
+        val session = supabase.auth.currentSessionOrNull() ?: return
+        sessionManager.saveSession(
+            accessToken  = session.accessToken,
+            refreshToken = session.refreshToken,
+            expiresAt    = session.expiresAt.toEpochMilliseconds()
+        )
     }
 }
 
 sealed class AuthState {
-    object Idle : AuthState()
+    object Idle    : AuthState()
     object Loading : AuthState()
     object Success : AuthState()
     data class Error(val message: String) : AuthState()

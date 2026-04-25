@@ -2,6 +2,7 @@ package com.aegis.app.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aegis.app.data.local.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -13,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val supabase: SupabaseClient
+    private val supabase: SupabaseClient,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _signedOut = MutableStateFlow(false)
@@ -29,6 +31,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 supabase.auth.signOut()
+                sessionManager.clearSession() // wipe EncryptedSharedPreferences
                 _signedOut.value = true
             } catch (e: Exception) {
                 _error.value = e.message
