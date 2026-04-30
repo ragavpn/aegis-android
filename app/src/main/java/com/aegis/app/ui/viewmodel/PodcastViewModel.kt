@@ -49,13 +49,13 @@ class PodcastViewModel @Inject constructor(
         }
     }
 
-    fun generateDailyDigest() {
+    fun generateDailyDigest(durationScale: String = "default") {
         if (_digestState.value is PodcastState.Generating) return
 
         viewModelScope.launch {
             _digestState.value = PodcastState.Generating
             try {
-                val response = apiService.generateDailyDigestPodcast()
+                val response = apiService.generateDailyDigestPodcast(mapOf("duration_scale" to durationScale))
                 val audioUrl = response["audio_url"]
                 if (audioUrl != null) {
                     _digestState.value = PodcastState.Ready(audioUrl)

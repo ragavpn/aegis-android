@@ -179,7 +179,7 @@ fun DashboardScreen(
                             item(key = "daily_digest_banner") {
                                 DailyDigestBanner(
                                     state = digestState,
-                                    onGenerate = { podcastViewModel.generateDailyDigest() },
+                                    onGenerate = { scale -> podcastViewModel.generateDailyDigest(scale) },
                                     onPlay = { url ->
                                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                                         context.startActivity(intent)
@@ -243,12 +243,14 @@ fun DashboardScreen(
 @Composable
 fun DailyDigestBanner(
     state: PodcastState,
-    onGenerate: () -> Unit,
+    onGenerate: (String) -> Unit,
     onPlay: (String) -> Unit
 ) {
     val gradient = Brush.horizontalGradient(
         colors = listOf(Color(0xFF1A1040), Color(0xFF0D1B3E))
     )
+    val durations = listOf("short" to "Short", "default" to "Default", "long" to "Long")
+    var selectedScale by remember { mutableStateOf("default") }
 
     Card(
         modifier = Modifier
@@ -283,12 +285,42 @@ fun DailyDigestBanner(
                         )
                     }
                 }
+
+                // Duration selector chips — only show when Idle or Error
+                if (state is PodcastState.Idle || state is PodcastState.Error) {
+                    Spacer(Modifier.height(14.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        durations.forEach { (value, label) ->
+                            val isSelected = selectedScale == value
+                            Surface(
+                                shape = RoundedCornerShape(20.dp),
+                                color = if (isSelected) Color(0xFFF59E0B) else Color(0xFF1E2D45),
+                                modifier = Modifier
+                                    .clickable { selectedScale = value }
+                                    .weight(1f)
+                            ) {
+                                Text(
+                                    label,
+                                    fontSize = 11.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (isSelected) Color(0xFF0A0E1A) else Color(0xFF94A3B8),
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+                }
+
                 Spacer(Modifier.height(16.dp))
 
                 when (state) {
                     is PodcastState.Idle -> {
                         Button(
-                            onClick = onGenerate,
+                            onClick = { onGenerate(selectedScale) },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFFF59E0B),
@@ -342,7 +374,7 @@ fun DailyDigestBanner(
                             fontSize = 12.sp,
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
-                        TextButton(onClick = onGenerate) {
+                        TextButton(onClick = { onGenerate(selectedScale) }) {
                             Text("Retry", color = Color(0xFFF59E0B))
                         }
                     }
